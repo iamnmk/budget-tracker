@@ -27,6 +27,13 @@ export const storeReceipt = mutation({
       size: args.size,
       mimeType: args.mimeType,
       status: "pending",
+      // Initialize extracted data fields as null
+      merchantName: null,
+      merchantAddress: null,
+      merchantContact: null,
+      transactionDate: null,
+      transactionAmount: null,
+      currency: null,
     });
 
     return receiptId;
@@ -92,6 +99,39 @@ export const deleteReceipt = mutation({
 
     // Delete the receipt record
     await ctx.db.delete(args.id);
+
+    return true;
+  },
+});
+
+// Update a receipt with extracted data
+export const updateReceiptWithExtractedData = mutation({
+  args: {
+    id: v.id("receipts"),
+    merchantName: v.string(),
+    merchantAddress: v.string(),
+    merchantContact: v.string(),
+    transactionDate: v.string(),
+    transactionAmount: v.string(),
+    currency: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify the receipt exists
+    const receipt = await ctx.db.get(args.id);
+    if (!receipt) {
+      throw new Error("Receipt not found");
+    }
+
+    // Update the receipt with the extracted data
+    await ctx.db.patch(args.id, {
+      merchantName: args.merchantName,
+      merchantAddress: args.merchantAddress,
+      merchantContact: args.merchantContact,
+      transactionDate: args.transactionDate,
+      transactionAmount: args.transactionAmount,
+      currency: args.currency,
+      status: "processed", // Mark as processed now that we have extracted data
+    });
 
     return true;
   },

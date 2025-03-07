@@ -17,5 +17,13 @@ export default defineSchema({
     size: v.number(),
     mimeType: v.string(),
     status: v.string(), // 'pending', 'processed', 'error'
+
+    // Fields for extracted data
+    merchantName: v.optional(v.string()),
+    merchantAddress: v.optional(v.string()),
+    merchantContact: v.optional(v.string()),
+    transactionDate: v.optional(v.string()),
+    transactionAmount: v.optional(v.string()),
+    currency: v.optional(v.string()),
   }),
 });

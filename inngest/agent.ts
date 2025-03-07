@@ -8,11 +8,15 @@ import {
 import { createServer } from "@inngest/agent-kit/server";
 import { inngest } from "./client";
 import { z } from "zod";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import convex from "@/lib/convexClient";
 
 const saveToDatabaseTool = createTool({
   name: "save-to-database",
   description: "Saves the given data to the convex database.",
   parameters: z.object({
+    receiptId: z.string().describe("The ID of the receipt to update"),
     merchantName: z.string(),
     merchantAddress: z.string(),
     merchantContact: z.string(),
@@ -20,35 +24,57 @@ const saveToDatabaseTool = createTool({
     transactionAmount: z.string(),
     currency: z.string(),
   }),
-  handler: async (
-    {
+  handler: async (params, context) => {
+    const {
+      receiptId,
       merchantName,
       merchantAddress,
       merchantContact,
       transactionDate,
       transactionAmount,
       currency,
-    },
-    { step },
-  ) => {
-    return await step?.run("save-receipt-to-database", async () => {
-      console.log("Saving to DB", {
-        merchantName,
-        merchantAddress,
-        merchantContact,
-        transactionDate,
-        transactionAmount,
-        currency,
-      });
-      return {
-        addedToDb: "Success",
-        merchantName,
-        merchantAddress,
-        merchantContact,
-        transactionDate,
-        transactionAmount,
-        currency,
-      };
+    } = params;
+
+    return await context.step?.run("save-receipt-to-database", async () => {
+      try {
+        // Call the Convex mutation to update the receipt with extracted data
+        await convex.mutation(api.receipts.updateReceiptWithExtractedData, {
+          id: receiptId as Id<"receipts">,
+          merchantName,
+          merchantAddress,
+          merchantContact,
+          transactionDate,
+          transactionAmount,
+          currency,
+        });
+
+        console.log("Successfully saved receipt data to Convex database:", {
+          receiptId,
+          merchantName,
+          merchantAddress,
+          merchantContact,
+          transactionDate,
+          transactionAmount,
+          currency,
+        });
+
+        return {
+          addedToDb: "Success",
+          receiptId,
+          merchantName,
+          merchantAddress,
+          merchantContact,
+          transactionDate,
+          transactionAmount,
+          currency,
+        };
+      } catch (error) {
+        console.error("Error saving to Convex database:", error);
+        return {
+          addedToDb: "Failed",
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
     });
   },
 });
