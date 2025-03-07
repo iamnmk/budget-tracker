@@ -6,11 +6,9 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import {
-  getFileDownloadUrl,
-  updateReceiptStatus,
-  deleteReceipt,
-} from "@/app/actions";
+import { getFileDownloadUrl } from "@/actions/getFileDownloadUrl";
+import { updateReceiptStatus } from "@/actions/updateReceiptStatus";
+import { deleteReceipt } from "@/actions/deleteReceipt";
 
 export default function ReceiptPage() {
   const router = useRouter();

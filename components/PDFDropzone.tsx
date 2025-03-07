@@ -5,7 +5,7 @@ import {
   useSensors,
   PointerSensor,
 } from "@dnd-kit/core";
-import { uploadPDF } from "@/app/actions";
+import { uploadPDF } from "@/actions/uploadPDF";
 
 interface PDFDropzoneProps {
   onUploadComplete?: () => void;
