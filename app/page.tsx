@@ -15,11 +15,6 @@ function Home() {
 
   return (
     <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-center">PDF Receipt Uploader</h1>
-      <p className="text-center text-gray-600 mb-8">
-        Upload your PDF receipts for processing
-      </p>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div>
           <PDFDropzone onUploadComplete={handleUploadComplete} />
