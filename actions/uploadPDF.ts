@@ -4,6 +4,7 @@ import { api } from "@/convex/_generated/api";
 import convex from "@/lib/convexClient";
 import { getFileDownloadUrl } from "./getFileDownloadUrl";
 import { inngest } from "@/inngest/client";
+import events from "@/inngest/constants";
 
 /**
  * Server action to upload a PDF file to Convex storage
@@ -59,7 +60,7 @@ export async function uploadPDF(formData: FormData) {
     const fileUrl = await getFileDownloadUrl(storageId);
 
     await inngest.send({
-      name: "pdf-function/event",
+      name: events.EXTRACT_DATA_FROM_PDF_AND_SAVE_TO_DATABASE,
       data: {
         url: fileUrl.downloadUrl,
         receiptId,
