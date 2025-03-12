@@ -9,6 +9,15 @@ import { useParams, useRouter } from "next/navigation";
 import { getFileDownloadUrl } from "@/actions/getFileDownloadUrl";
 import { updateReceiptStatus } from "@/actions/updateReceiptStatus";
 import { deleteReceipt } from "@/actions/deleteReceipt";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 export default function ReceiptPage() {
   const router = useRouter();
@@ -207,7 +216,7 @@ export default function ReceiptPage() {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold text-gray-900 truncate">
-                {receipt.fileName}
+                {receipt.fileDisplayName || receipt.fileName}
               </h1>
               <span
                 className={`px-3 py-1 rounded-full text-sm ${
@@ -361,68 +370,43 @@ export default function ReceiptPage() {
                       Items ({receipt.items.length})
                     </h4>
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Item
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Quantity
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Unit Price
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Total
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Item</TableHead>
+                            <TableHead>Quantity</TableHead>
+                            <TableHead>Unit Price</TableHead>
+                            <TableHead>Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
                           {receipt.items.map((item, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">
                                 {item.name}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {item.quantity}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              </TableCell>
+                              <TableCell>{item.quantity}</TableCell>
+                              <TableCell>
                                 {formatCurrency(
                                   item.unitPrice,
                                   receipt.currency,
                                 )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              </TableCell>
+                              <TableCell>
                                 {formatCurrency(
                                   item.totalPrice,
                                   receipt.currency,
                                 )}
-                              </td>
-                            </tr>
+                              </TableCell>
+                            </TableRow>
                           ))}
-                        </tbody>
-                        <tfoot className="bg-gray-50">
-                          <tr>
-                            <td
-                              colSpan={3}
-                              className="px-6 py-3 text-right text-sm font-medium text-gray-500"
-                            >
+                        </TableBody>
+                        <TableFooter>
+                          <TableRow>
+                            <TableCell colSpan={3} className="text-right">
                               Total
-                            </td>
-                            <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                            </TableCell>
+                            <TableCell className="font-medium">
                               {formatCurrency(
                                 receipt.items.reduce(
                                   (sum, item) => sum + item.totalPrice,
@@ -430,10 +414,10 @@ export default function ReceiptPage() {
                                 ),
                                 receipt.currency,
                               )}
-                            </td>
-                          </tr>
-                        </tfoot>
-                      </table>
+                            </TableCell>
+                          </TableRow>
+                        </TableFooter>
+                      </Table>
                     </div>
                   </div>
                 )}

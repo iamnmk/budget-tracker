@@ -109,6 +109,7 @@ export const deleteReceipt = mutation({
 export const updateReceiptWithExtractedData = mutation({
   args: {
     id: v.id("receipts"),
+    fileDisplayName: v.string(),
     merchantName: v.string(),
     merchantAddress: v.string(),
     merchantContact: v.string(),
@@ -134,6 +135,7 @@ export const updateReceiptWithExtractedData = mutation({
 
     // Update the receipt with the extracted data
     await ctx.db.patch(args.id, {
+      fileDisplayName: args.fileDisplayName,
       merchantName: args.merchantName,
       merchantAddress: args.merchantAddress,
       merchantContact: args.merchantContact,

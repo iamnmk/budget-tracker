@@ -46,7 +46,7 @@ export default function ReceiptList() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {receipt.fileName}
+                    {receipt.fileDisplayName || receipt.fileName}
                   </p>
                   <div className="flex text-xs text-gray-500 mt-1">
                     <p>

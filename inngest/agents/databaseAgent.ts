@@ -10,6 +10,11 @@ const saveToDatabaseTool = createTool({
   name: "save-to-database",
   description: "Saves the given data to the convex database.",
   parameters: z.object({
+    fileDisplayName: z
+      .string()
+      .describe(
+        "The readable display name of the receipt to show in the UI. If the file name is not human readable, use this to give a more readable name.",
+      ),
     receiptId: z.string().describe("The ID of the receipt to update"),
     merchantName: z.string(),
     merchantAddress: z.string(),
@@ -37,6 +42,7 @@ const saveToDatabaseTool = createTool({
   }),
   handler: async (params, context) => {
     const {
+      fileDisplayName,
       receiptId,
       merchantName,
       merchantAddress,
@@ -55,6 +61,7 @@ const saveToDatabaseTool = createTool({
           // Call the Convex mutation to update the receipt with extracted data
           await convex.mutation(api.receipts.updateReceiptWithExtractedData, {
             id: receiptId as Id<"receipts">,
+            fileDisplayName,
             merchantName,
             merchantAddress,
             merchantContact,
@@ -68,6 +75,7 @@ const saveToDatabaseTool = createTool({
           return {
             addedToDb: "Success",
             receiptId,
+            fileDisplayName,
             merchantName,
             merchantAddress,
             merchantContact,

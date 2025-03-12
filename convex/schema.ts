@@ -8,6 +8,7 @@ import { v } from "convex/values";
 export default defineSchema({
   receipts: defineTable({
     fileName: v.string(),
+    fileDisplayName: v.optional(v.string()),
     fileId: v.id("_storage"),
     uploadedAt: v.number(),
     size: v.number(),
