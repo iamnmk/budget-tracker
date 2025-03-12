@@ -7,6 +7,7 @@ import { v } from "convex/values";
 // The schema provides more precise TypeScript types.
 export default defineSchema({
   receipts: defineTable({
+    userId: v.string(), // Clerk user ID
     fileName: v.string(),
     fileDisplayName: v.optional(v.string()),
     fileId: v.id("_storage"),

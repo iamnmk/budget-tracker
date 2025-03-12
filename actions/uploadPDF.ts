@@ -5,11 +5,18 @@ import convex from "@/lib/convexClient";
 import { getFileDownloadUrl } from "./getFileDownloadUrl";
 import { inngest } from "@/inngest/client";
 import events from "@/inngest/constants";
+import { currentUser } from "@clerk/nextjs/server";
 
 /**
  * Server action to upload a PDF file to Convex storage
  */
 export async function uploadPDF(formData: FormData) {
+  const user = await currentUser();
+
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
   try {
     // Get the file from the form data
     const file = formData.get("file") as File;
@@ -50,6 +57,7 @@ export async function uploadPDF(formData: FormData) {
 
     // Add receipt to the database
     const receiptId = await convex.mutation(api.receipts.storeReceipt, {
+      userId: user.id,
       fileId: storageId,
       fileName: file.name,
       size: file.size,

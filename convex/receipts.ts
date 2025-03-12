@@ -13,6 +13,7 @@ export const generateUploadUrl = mutation({
 // Store a receipt file and add it to the database
 export const storeReceipt = mutation({
   args: {
+    userId: v.string(),
     fileId: v.id("_storage"),
     fileName: v.string(),
     size: v.number(),
@@ -21,6 +22,7 @@ export const storeReceipt = mutation({
   handler: async (ctx, args) => {
     // Save the receipt to the database
     const receiptId = await ctx.db.insert("receipts", {
+      userId: args.userId,
       fileName: args.fileName,
       fileId: args.fileId,
       uploadedAt: Date.now(),
@@ -43,9 +45,16 @@ export const storeReceipt = mutation({
 
 // Function to get all receipts
 export const getReceipts = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("receipts").order("desc").collect();
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Only return receipts for the authenticated user
+    return await ctx.db
+      .query("receipts")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .order("desc")
+      .collect();
   },
 });
 
@@ -55,7 +64,23 @@ export const getReceiptById = query({
     id: v.id("receipts"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    // Get the receipt
+    const receipt = await ctx.db.get(args.id);
+
+    // Verify user has access to this receipt
+    if (receipt) {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) {
+        throw new Error("Not authenticated");
+      }
+
+      const userId = identity.subject;
+      if (receipt.userId !== userId) {
+        throw new Error("Not authorized to access this receipt");
+      }
+    }
+
+    return receipt;
   },
 });
 
@@ -77,6 +102,22 @@ export const updateReceiptStatus = mutation({
     status: v.string(),
   },
   handler: async (ctx, args) => {
+    // Verify user has access to this receipt
+    const receipt = await ctx.db.get(args.id);
+    if (!receipt) {
+      throw new Error("Receipt not found");
+    }
+
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    if (receipt.userId !== userId) {
+      throw new Error("Not authorized to update this receipt");
+    }
+
     await ctx.db.patch(args.id, {
       status: args.status,
     });
@@ -93,6 +134,17 @@ export const deleteReceipt = mutation({
     const receipt = await ctx.db.get(args.id);
     if (!receipt) {
       throw new Error("Receipt not found");
+    }
+
+    // Verify user has access to this receipt
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    if (receipt.userId !== userId) {
+      throw new Error("Not authorized to delete this receipt");
     }
 
     // Delete the file from storage

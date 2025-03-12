@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -10,9 +12,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUser } from "@clerk/nextjs";
 
 export default function ReceiptList() {
-  const receipts = useQuery(api.receipts.getReceipts);
+  const { user } = useUser();
+  const receipts = useQuery(api.receipts.getReceipts, {
+    userId: user?.id || "",
+  });
+
+  if (!user) {
+    return (
+      <div className="w-full p-8 text-center">
+        <p className="text-gray-600">Please sign in to view your receipts.</p>
+      </div>
+    );
+  }
 
   if (!receipts) {
     return (
