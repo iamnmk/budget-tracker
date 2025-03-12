@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { inngest } from "@/inngest/client";
+
 import PDFDropzone from "@/components/PDFDropzone";
 import ReceiptList from "@/components/ReceiptList";
 

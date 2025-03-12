@@ -22,6 +22,18 @@ const saveToDatabaseTool = createTool({
         "A summary of the receipt, including the merchant name, address, contact, transaction date, transaction amount, and currency. Include a human readable summary of the receipt. Mention both invoice number and receipt number if both are present. ",
       ),
     currency: z.string(),
+    items: z.array(
+      z
+        .object({
+          name: z.string(),
+          quantity: z.number(),
+          unitPrice: z.number(),
+          totalPrice: z.number(),
+        })
+        .describe(
+          "An array of items on the receipt. Include the name, quantity, unit price, and total price of each item.",
+        ),
+    ),
   }),
   handler: async (params, context) => {
     const {
@@ -33,6 +45,7 @@ const saveToDatabaseTool = createTool({
       transactionAmount,
       receiptSummary,
       currency,
+      items,
     } = params;
 
     const result = await context.step?.run(
@@ -49,6 +62,7 @@ const saveToDatabaseTool = createTool({
             transactionAmount,
             receiptSummary,
             currency,
+            items,
           });
 
           return {
@@ -60,6 +74,8 @@ const saveToDatabaseTool = createTool({
             transactionDate,
             transactionAmount,
             currency,
+            receiptSummary,
+            items,
           };
         } catch (error) {
           return {

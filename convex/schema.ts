@@ -22,5 +22,13 @@ export default defineSchema({
     transactionAmount: v.optional(v.string()),
     currency: v.optional(v.string()),
     receiptSummary: v.optional(v.string()),
+    items: v.array(
+      v.object({
+        name: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        totalPrice: v.number(),
+      }),
+    ),
   }),
 });

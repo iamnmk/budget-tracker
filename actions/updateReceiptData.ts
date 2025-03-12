@@ -17,6 +17,12 @@ export async function updateReceiptData(
     transactionAmount: string;
     receiptSummary: string;
     currency: string;
+    items: {
+      name: string;
+      quantity: number;
+      unitPrice: number;
+      totalPrice: number;
+    }[];
   },
 ) {
   try {

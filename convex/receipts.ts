@@ -34,6 +34,7 @@ export const storeReceipt = mutation({
       transactionDate: undefined,
       transactionAmount: undefined,
       currency: undefined,
+      items: [],
     });
 
     return receiptId;
@@ -115,6 +116,14 @@ export const updateReceiptWithExtractedData = mutation({
     transactionAmount: v.string(),
     currency: v.string(),
     receiptSummary: v.string(),
+    items: v.array(
+      v.object({
+        name: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        totalPrice: v.number(),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     // Verify the receipt exists
@@ -132,6 +141,7 @@ export const updateReceiptWithExtractedData = mutation({
       transactionAmount: args.transactionAmount,
       currency: args.currency,
       receiptSummary: args.receiptSummary,
+      items: args.items,
       status: "processed", // Mark as processed now that we have extracted data
     });
 

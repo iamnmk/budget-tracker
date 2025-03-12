@@ -353,6 +353,90 @@ export default function ReceiptPage() {
                     </p>
                   </div>
                 )}
+
+                {/* Items Section */}
+                {receipt.items && receipt.items.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="font-medium text-gray-700 mb-3">
+                      Items ({receipt.items.length})
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                              Item
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                              Quantity
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                              Unit Price
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                              Total
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {receipt.items.map((item, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">
+                                {item.name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {item.quantity}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {formatCurrency(
+                                  item.unitPrice,
+                                  receipt.currency,
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {formatCurrency(
+                                  item.totalPrice,
+                                  receipt.currency,
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-gray-50">
+                          <tr>
+                            <td
+                              colSpan={3}
+                              className="px-6 py-3 text-right text-sm font-medium text-gray-500"
+                            >
+                              Total
+                            </td>
+                            <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {formatCurrency(
+                                receipt.items.reduce(
+                                  (sum, item) => sum + item.totalPrice,
+                                  0,
+                                ),
+                                receipt.currency,
+                              )}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -418,4 +502,9 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+// Helper function to format currency
+function formatCurrency(amount: number, currency: string = ""): string {
+  return `${amount.toFixed(2)}${currency ? ` ${currency}` : ""}`;
 }

@@ -8,28 +8,29 @@ const parsePdfTool = createTool({
     pdfUrl: z.string(),
   }),
   handler: async ({ pdfUrl }, { step }) => {
-    return await step?.ai.infer("parse-pdf", {
-      model: anthropic({
-        model: "claude-3-5-sonnet-20241022",
-        defaultParameters: {
-          max_tokens: 3094,
-        },
-      }),
-      body: {
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "document",
-                source: {
-                  type: "url",
-                  url: pdfUrl,
+    try {
+      return await step?.ai.infer("parse-pdf", {
+        model: anthropic({
+          model: "claude-3-5-sonnet-20241022",
+          defaultParameters: {
+            max_tokens: 3094,
+          },
+        }),
+        body: {
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "document",
+                  source: {
+                    type: "url",
+                    url: pdfUrl,
+                  },
                 },
-              },
-              {
-                type: "text",
-                text: `Extract the data from the receipt and return the structured output as follows: 
+                {
+                  type: "text",
+                  text: `Extract the data from the receipt and return the structured output as follows: 
                   {
                     "merchant": {
                       "name": "Store Name",
@@ -57,12 +58,16 @@ const parsePdfTool = createTool({
                     },
                   }
                   `,
-              },
-            ],
-          },
-        ],
-      },
-    });
+                },
+              ],
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("Error parsing PDF:", error);
+      throw error;
+    }
   },
 });
 

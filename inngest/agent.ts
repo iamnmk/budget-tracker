@@ -1,9 +1,13 @@
-import { anthropic, createNetwork } from "@inngest/agent-kit";
+import {
+  anthropic,
+  createNetwork,
+  getDefaultRoutingAgent,
+} from "@inngest/agent-kit";
 import { createServer } from "@inngest/agent-kit/server";
 import { inngest } from "./client";
 import { databaseAgent } from "./agents/databaseAgent";
 import { receiptScanningAgent } from "./agents/receiptScanningAgent";
-import { supervisorRoutingAgent } from "./agents/supervisorRoutingAgent";
+// import { supervisorRoutingAgent } from "./agents/supervisorRoutingAgent";
 import events from "./constants";
 
 const agentNetwork = createNetwork({
@@ -15,7 +19,14 @@ const agentNetwork = createNetwork({
       max_tokens: 1000,
     },
   }),
-  defaultRouter: supervisorRoutingAgent,
+  defaultRouter: ({ network }) => {
+    const savedToDatabase = network.state.kv.get("saved-to-database");
+    if (savedToDatabase !== undefined) {
+      // Terminate the agent process if the data has been saved to the database
+      return undefined;
+    }
+    return getDefaultRoutingAgent();
+  },
 });
 export const server = createServer({
   agents: [databaseAgent, receiptScanningAgent],
@@ -23,7 +34,7 @@ export const server = createServer({
 });
 
 export const pdfFunction = inngest.createFunction(
-  { id: "pdf-function" },
+  { id: "Extract PDF and Save in Database" },
   { event: events.EXTRACT_DATA_FROM_PDF_AND_SAVE_TO_DATABASE },
   async ({ event }) => {
     // step 1: extract the data from the receipt
