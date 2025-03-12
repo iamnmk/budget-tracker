@@ -170,9 +170,17 @@ export default function ReceiptPage() {
   // Format upload date
   const uploadDate = new Date(receipt.uploadedAt).toLocaleString();
 
+  // Check if receipt has extracted data
+  const hasExtractedData = !!(
+    receipt.merchantName ||
+    receipt.merchantAddress ||
+    receipt.transactionDate ||
+    receipt.transactionAmount
+  );
+
   return (
     <div className="container mx-auto py-10 px-4">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <nav className="mb-6">
           <Link
             href="/"
@@ -195,7 +203,7 @@ export default function ReceiptPage() {
           </Link>
         </nav>
 
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold text-gray-900 truncate">
@@ -271,6 +279,82 @@ export default function ReceiptPage() {
                 </div>
               </div>
             </div>
+
+            {hasExtractedData && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Receipt Details</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Merchant Information */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-3">
+                      Merchant Information
+                    </h4>
+                    <div className="space-y-2">
+                      {receipt.merchantName && (
+                        <div>
+                          <p className="text-sm text-gray-500">Name</p>
+                          <p className="font-medium">{receipt.merchantName}</p>
+                        </div>
+                      )}
+                      {receipt.merchantAddress && (
+                        <div>
+                          <p className="text-sm text-gray-500">Address</p>
+                          <p className="font-medium">
+                            {receipt.merchantAddress}
+                          </p>
+                        </div>
+                      )}
+                      {receipt.merchantContact && (
+                        <div>
+                          <p className="text-sm text-gray-500">Contact</p>
+                          <p className="font-medium">
+                            {receipt.merchantContact}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Transaction Information */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-3">
+                      Transaction Details
+                    </h4>
+                    <div className="space-y-2">
+                      {receipt.transactionDate && (
+                        <div>
+                          <p className="text-sm text-gray-500">Date</p>
+                          <p className="font-medium">
+                            {receipt.transactionDate}
+                          </p>
+                        </div>
+                      )}
+                      {receipt.transactionAmount && (
+                        <div>
+                          <p className="text-sm text-gray-500">Amount</p>
+                          <p className="font-medium">
+                            {receipt.transactionAmount} {receipt.currency || ""}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Receipt Summary */}
+                {receipt.receiptSummary && (
+                  <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-3">
+                      Receipt Summary
+                    </h4>
+                    <p className="text-sm whitespace-pre-line">
+                      {receipt.receiptSummary}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-8 border-t pt-6">
               <h3 className="text-sm font-medium text-gray-500 mb-4">

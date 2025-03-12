@@ -15,6 +15,7 @@ export async function updateReceiptData(
     merchantContact: string;
     transactionDate: string;
     transactionAmount: string;
+    receiptSummary: string;
     currency: string;
   },
 ) {

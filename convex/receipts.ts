@@ -28,12 +28,12 @@ export const storeReceipt = mutation({
       mimeType: args.mimeType,
       status: "pending",
       // Initialize extracted data fields as null
-      merchantName: null,
-      merchantAddress: null,
-      merchantContact: null,
-      transactionDate: null,
-      transactionAmount: null,
-      currency: null,
+      merchantName: undefined,
+      merchantAddress: undefined,
+      merchantContact: undefined,
+      transactionDate: undefined,
+      transactionAmount: undefined,
+      currency: undefined,
     });
 
     return receiptId;
@@ -114,6 +114,7 @@ export const updateReceiptWithExtractedData = mutation({
     transactionDate: v.string(),
     transactionAmount: v.string(),
     currency: v.string(),
+    receiptSummary: v.string(),
   },
   handler: async (ctx, args) => {
     // Verify the receipt exists
@@ -130,6 +131,7 @@ export const updateReceiptWithExtractedData = mutation({
       transactionDate: args.transactionDate,
       transactionAmount: args.transactionAmount,
       currency: args.currency,
+      receiptSummary: args.receiptSummary,
       status: "processed", // Mark as processed now that we have extracted data
     });
 
