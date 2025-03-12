@@ -20,7 +20,11 @@ const saveToDatabaseTool = createTool({
     merchantAddress: z.string(),
     merchantContact: z.string(),
     transactionDate: z.string(),
-    transactionAmount: z.string(),
+    transactionAmount: z
+      .string()
+      .describe(
+        "The total amount of the transaction, summing all the items on the receipt.",
+      ),
     receiptSummary: z
       .string()
       .describe(

@@ -1,8 +1,15 @@
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Link from "next/link";
 import { Doc } from "@/convex/_generated/dataModel";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function ReceiptList() {
   const receipts = useQuery(api.receipts.getReceipts);
@@ -28,48 +35,65 @@ export default function ReceiptList() {
     <div className="w-full">
       <h2 className="text-xl font-semibold mb-4">Your Receipts</h2>
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <ul className="divide-y divide-gray-200">
-          {receipts.map((receipt: Doc<"receipts">) => (
-            <li key={receipt._id} className="hover:bg-gray-50">
-              <Link
-                href={`/receipt/${receipt._id}`}
-                className="flex items-center p-4"
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[40px]"></TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Uploaded</TableHead>
+              <TableHead>Size</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[40px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {receipts.map((receipt: Doc<"receipts">) => (
+              <TableRow
+                key={receipt._id}
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() =>
+                  (window.location.href = `/receipt/${receipt._id}`)
+                }
               >
-                <div className="flex-shrink-0 mr-4">
+                <TableCell className="py-2">
                   <svg
-                    className="h-9 w-9 text-red-500"
+                    className="h-6 w-6 text-red-500"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path d="M14.5,2H6A2,2,0,0,0,4,4V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V7.5ZM14,15h1a1,1,0,0,1,0,2H14a1,1,0,0,1,0-2Zm-6,0h3a1,1,0,0,1,0,2H8a1,1,0,0,1,0-2Zm8-3H8a1,1,0,0,1,0-2h8a1,1,0,0,1,0,2ZM15,7h2.5L15,4.5Z" />
                   </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {receipt.fileDisplayName || receipt.fileName}
-                  </p>
-                  <div className="flex text-xs text-gray-500 mt-1">
-                    <p>
-                      Uploaded: {new Date(receipt.uploadedAt).toLocaleString()}
-                    </p>
-                    <p className="ml-4">Size: {formatFileSize(receipt.size)}</p>
-                    <span
-                      className={`ml-4 px-2 py-0.5 rounded-full text-xs ${
-                        receipt.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : receipt.status === "processed"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {receipt.status.charAt(0).toUpperCase() +
-                        receipt.status.slice(1)}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-shrink-0 ml-2">
+                </TableCell>
+                <TableCell className="font-medium">
+                  {receipt.fileDisplayName || receipt.fileName}
+                </TableCell>
+                <TableCell>
+                  {new Date(receipt.uploadedAt).toLocaleString()}
+                </TableCell>
+                <TableCell>{formatFileSize(receipt.size)}</TableCell>
+                <TableCell>
+                  {receipt.transactionAmount
+                    ? `${receipt.transactionAmount} ${receipt.currency || ""}`
+                    : "-"}
+                </TableCell>
+                <TableCell>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      receipt.status === "pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : receipt.status === "processed"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {receipt.status.charAt(0).toUpperCase() +
+                      receipt.status.slice(1)}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
                   <svg
-                    className="h-5 w-5 text-gray-400"
+                    className="h-5 w-5 text-gray-400 ml-auto"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -81,11 +105,11 @@ export default function ReceiptList() {
                       d="M9 5l7 7-7 7"
                     />
                   </svg>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
