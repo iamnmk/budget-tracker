@@ -2,9 +2,10 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import convex from "@/lib/convexClient";
 import { createTool, openai } from "@inngest/agent-kit";
-
+import { client } from "@/lib/schematic";
 import { createAgent } from "@inngest/agent-kit";
 import { z } from "zod";
+import { currentUser } from "@clerk/nextjs/server";
 
 const saveToDatabaseTool = createTool({
   name: "save-to-database",
@@ -74,6 +75,23 @@ const saveToDatabaseTool = createTool({
             receiptSummary,
             currency,
             items,
+          });
+
+          const user = await currentUser();
+
+          if (!user) {
+            throw new Error("User not found");
+          }
+
+          // Track event in schematic
+          await client.track({
+            event: "scan",
+            company: {
+              id: user.id,
+            },
+            user: {
+              id: user.id,
+            },
           });
 
           return {
