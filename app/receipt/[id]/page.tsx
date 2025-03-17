@@ -7,7 +7,6 @@ import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getFileDownloadUrl } from "@/actions/getFileDownloadUrl";
-import { updateReceiptStatus } from "@/actions/updateReceiptStatus";
 import { deleteReceipt } from "@/actions/deleteReceipt";
 import {
   Table,
@@ -18,14 +17,16 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { ChevronLeft, FileText, Sparkles, Lightbulb, Lock } from "lucide-react";
+import { useSchematicFlag } from "@schematichq/schematic-react";
 
 export default function ReceiptPage() {
   const router = useRouter();
   const [receiptId, setReceiptId] = useState<Id<"receipts"> | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [processingStatus, setProcessingStatus] = useState(false);
   const [isLoadingDownload, setIsLoadingDownload] = useState(false);
   const params = useParams<{ id: string }>();
+  const isSummariesEnabled = useSchematicFlag("summaries");
 
   // Convert the URL string ID to a Convex ID
   useEffect(() => {
@@ -84,29 +85,6 @@ export default function ReceiptPage() {
     }
   };
 
-  // Function to mark receipt as processed using server action
-  const handleMarkAsProcessed = async () => {
-    if (!receiptId || !receipt) return;
-
-    try {
-      setProcessingStatus(true);
-
-      // Call the server action to update status
-      const newStatus =
-        receipt.status === "processed" ? "pending" : "processed";
-      const result = await updateReceiptStatus(receiptId, newStatus);
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Failed to update status. Please try again.");
-    } finally {
-      setProcessingStatus(false);
-    }
-  };
-
   // Function to delete receipt using server action
   const handleDeleteReceipt = async () => {
     if (!receiptId) return;
@@ -135,22 +113,11 @@ export default function ReceiptPage() {
     }
   };
 
-  if (!receiptId) {
-    return (
-      <div className="container mx-auto py-10 px-4">
-        <div className="text-center">
-          <p>Invalid receipt ID. Redirecting...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (receipt === undefined) {
     return (
       <div className="container mx-auto py-10 px-4">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-          <p className="ml-2">Loading receipt details...</p>
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
         </div>
       </div>
     );
@@ -192,22 +159,10 @@ export default function ReceiptPage() {
       <div className="max-w-4xl mx-auto">
         <nav className="mb-6">
           <Link
-            href="/"
+            href="/receipts"
             className="text-blue-500 hover:underline flex items-center"
           >
-            <svg
-              className="h-4 w-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Receipts
           </Link>
         </nav>
@@ -218,18 +173,25 @@ export default function ReceiptPage() {
               <h1 className="text-2xl font-bold text-gray-900 truncate">
                 {receipt.fileDisplayName || receipt.fileName}
               </h1>
-              <span
-                className={`px-3 py-1 rounded-full text-sm ${
-                  receipt.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : receipt.status === "processed"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                }`}
-              >
-                {receipt.status.charAt(0).toUpperCase() +
-                  receipt.status.slice(1)}
-              </span>
+              <div className="flex items-center">
+                {receipt.status === "pending" ? (
+                  <div className="mr-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-800"></div>
+                  </div>
+                ) : null}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    receipt.status === "pending"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : receipt.status === "processed"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {receipt.status.charAt(0).toUpperCase() +
+                    receipt.status.slice(1)}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -267,13 +229,7 @@ export default function ReceiptPage() {
 
               <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
                 <div className="text-center">
-                  <svg
-                    className="h-16 w-16 text-red-500 mx-auto"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M14.5,2H6A2,2,0,0,0,4,4V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V7.5ZM14,15h1a1,1,0,0,1,0,2H14a1,1,0,0,1,0-2Zm-6,0h3a1,1,0,0,1,0,2H8a1,1,0,0,1,0-2Zm8-3H8a1,1,0,0,1,0-2h8a1,1,0,0,1,0,2ZM15,7h2.5L15,4.5Z" />
-                  </svg>
+                  <FileText className="h-16 w-16 text-blue-500 mx-auto" />
                   <p className="mt-4 text-sm text-gray-500">PDF Preview</p>
                   {downloadUrl && (
                     <a
@@ -353,14 +309,67 @@ export default function ReceiptPage() {
 
                 {/* Receipt Summary */}
                 {receipt.receiptSummary && (
-                  <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-gray-700 mb-3">
-                      Receipt Summary
-                    </h4>
-                    <p className="text-sm whitespace-pre-line">
-                      {receipt.receiptSummary}
-                    </p>
-                  </div>
+                  <>
+                    {isSummariesEnabled ? (
+                      <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-100 shadow-sm">
+                        <div className="flex items-center mb-4">
+                          <h4 className="font-semibold text-blue-700">
+                            AI Summary
+                          </h4>
+                          <div className="ml-2 flex">
+                            <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
+                            <Sparkles className="h-3 w-3 text-yellow-400 -ml-1" />
+                          </div>
+                        </div>
+                        <div className="bg-white bg-opacity-60 rounded-lg p-4 border border-blue-100">
+                          <p className="text-sm whitespace-pre-line leading-relaxed text-gray-700">
+                            {receipt.receiptSummary}
+                          </p>
+                        </div>
+                        <div className="mt-3 text-xs text-blue-600 italic flex items-center">
+                          <Lightbulb className="h-3 w-3 mr-1" />
+                          <span>
+                            AI-generated summary based on receipt data
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-6 bg-gray-100 p-6 rounded-lg border border-gray-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center">
+                            <h4 className="font-semibold text-gray-500">
+                              AI Summary
+                            </h4>
+                            <div className="ml-2 flex">
+                              <Sparkles className="h-3.5 w-3.5 text-gray-400" />
+                              <Sparkles className="h-3 w-3 text-gray-300 -ml-1" />
+                            </div>
+                          </div>
+                          <Lock className="h-4 w-4 text-gray-500" />
+                        </div>
+                        <div className="bg-white bg-opacity-50 rounded-lg p-4 border border-gray-200 flex flex-col items-center justify-center">
+                          <Link
+                            href="/manage-plan"
+                            className="text-center py-4"
+                          >
+                            <Lock className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                            <p className="text-sm text-gray-500 mb-2">
+                              AI summary is a PRO level feature
+                            </p>
+                            <button className="mt-2 px-4 py-1.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 inline-block">
+                              Upgrade to Unlock
+                            </button>
+                          </Link>
+                        </div>
+                        <div className="mt-3 text-xs text-gray-400 italic flex items-center">
+                          <Lightbulb className="h-3 w-3 mr-1" />
+                          <span>
+                            Get AI-powered insights from your receipts
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Items Section */}
@@ -429,23 +438,6 @@ export default function ReceiptPage() {
                 Actions
               </h3>
               <div className="flex flex-wrap gap-3">
-                <button
-                  className={`px-4 py-2 border rounded text-sm ${
-                    processingStatus
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : receipt.status === "processed"
-                        ? "bg-yellow-50 border-yellow-200 text-yellow-600 hover:bg-yellow-100"
-                        : "bg-green-50 border-green-200 text-green-600 hover:bg-green-100"
-                  }`}
-                  onClick={handleMarkAsProcessed}
-                  disabled={processingStatus}
-                >
-                  {processingStatus
-                    ? "Updating..."
-                    : receipt.status === "processed"
-                      ? "Mark as Pending"
-                      : "Mark as Processed"}
-                </button>
                 <button
                   className={`px-4 py-2 bg-white border border-gray-300 rounded text-sm text-gray-700 ${
                     isLoadingDownload

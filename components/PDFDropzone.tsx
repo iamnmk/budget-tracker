@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useCallback, useRef } from "react";
 import {
   DndContext,
@@ -9,19 +11,23 @@ import { uploadPDF } from "@/actions/uploadPDF";
 import { useUser } from "@clerk/nextjs";
 import { useSchematicEntitlement } from "@schematichq/schematic-react";
 import { Button } from "./ui/button";
-import { CloudUpload, CheckCircle } from "lucide-react";
+import { CloudUpload, CheckCircle, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface PDFDropzoneProps {
-  onUploadComplete?: () => void;
-}
-
-export default function PDFDropzone({ onUploadComplete }: PDFDropzoneProps) {
+export default function PDFDropzone() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
   const { user } = useUser();
-  const { value: isFeatureEnabled } = useSchematicEntitlement("scan-receipt");
+  const {
+    value: isFeatureEnabled,
+    featureUsageExceeded,
+    featureAllocation,
+  } = useSchematicEntitlement("scan-receipt");
+
+  console.log(isFeatureEnabled);
 
   const handleUpload = useCallback(
     async (files: FileList | File[]) => {
@@ -69,8 +75,7 @@ export default function PDFDropzone({ onUploadComplete }: PDFDropzoneProps) {
           setUploadedFiles([]);
         }, 5000);
 
-        // Call the callback to notify parent component that upload is complete
-        onUploadComplete?.();
+        router.push("/receipts");
       } catch (error) {
         console.error("Upload failed:", error);
         alert(
@@ -80,7 +85,7 @@ export default function PDFDropzone({ onUploadComplete }: PDFDropzoneProps) {
         setIsUploading(false);
       }
     },
-    [user, onUploadComplete],
+    [user, router],
   );
 
   // Set up sensors for drag detection
@@ -175,6 +180,18 @@ export default function PDFDropzone({ onUploadComplete }: PDFDropzoneProps) {
                 {isFeatureEnabled ? "Select files" : "Upgrade to upload"}
               </Button>
             </>
+          )}
+        </div>
+
+        <div className="mt-4">
+          {featureUsageExceeded && (
+            <div className="flex items-center p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
+              <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+              <span>
+                You have exceeded your limit of {featureAllocation} scans.
+                Please upgrade to continue.
+              </span>
+            </div>
           )}
         </div>
 

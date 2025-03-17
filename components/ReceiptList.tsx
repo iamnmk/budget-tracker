@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useUser } from "@clerk/nextjs";
-
+import { ChevronRight, FileText } from "lucide-react";
 export default function ReceiptList() {
   const { user } = useUser();
   const receipts = useQuery(api.receipts.getReceipts, {
@@ -71,13 +71,7 @@ export default function ReceiptList() {
                 }
               >
                 <TableCell className="py-2">
-                  <svg
-                    className="h-6 w-6 text-red-500"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M14.5,2H6A2,2,0,0,0,4,4V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V7.5ZM14,15h1a1,1,0,0,1,0,2H14a1,1,0,0,1,0-2Zm-6,0h3a1,1,0,0,1,0,2H8a1,1,0,0,1,0-2Zm8-3H8a1,1,0,0,1,0-2h8a1,1,0,0,1,0,2ZM15,7h2.5L15,4.5Z" />
-                  </svg>
+                  <FileText className="h-6 w-6 text-red-500" />
                 </TableCell>
                 <TableCell className="font-medium">
                   {receipt.fileDisplayName || receipt.fileName}
@@ -106,19 +100,7 @@ export default function ReceiptList() {
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <svg
-                    className="h-5 w-5 text-gray-400 ml-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                  <ChevronRight className="h-5 w-5 text-gray-400 ml-auto" />
                 </TableCell>
               </TableRow>
             ))}

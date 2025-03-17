@@ -5,7 +5,6 @@ import { createTool, openai } from "@inngest/agent-kit";
 import { client } from "@/lib/schematic";
 import { createAgent } from "@inngest/agent-kit";
 import { z } from "zod";
-import { currentUser } from "@clerk/nextjs/server";
 
 const saveToDatabaseTool = createTool({
   name: "save-to-database",
@@ -29,7 +28,7 @@ const saveToDatabaseTool = createTool({
     receiptSummary: z
       .string()
       .describe(
-        "A summary of the receipt, including the merchant name, address, contact, transaction date, transaction amount, and currency. Include a human readable summary of the receipt. Mention both invoice number and receipt number if both are present. ",
+        "A summary of the receipt, including the merchant name, address, contact, transaction date, transaction amount, and currency. Include a human readable summary of the receipt. Mention both invoice number and receipt number if both are present. Include some key details about the items on the receipt, this is a special featured summary so it should include some key details about the items on the receipt with some context.",
       ),
     currency: z.string(),
     items: z.array(
@@ -64,33 +63,30 @@ const saveToDatabaseTool = createTool({
       async () => {
         try {
           // Call the Convex mutation to update the receipt with extracted data
-          await convex.mutation(api.receipts.updateReceiptWithExtractedData, {
-            id: receiptId as Id<"receipts">,
-            fileDisplayName,
-            merchantName,
-            merchantAddress,
-            merchantContact,
-            transactionDate,
-            transactionAmount,
-            receiptSummary,
-            currency,
-            items,
-          });
-
-          const user = await currentUser();
-
-          if (!user) {
-            throw new Error("User not found");
-          }
+          const { userId } = await convex.mutation(
+            api.receipts.updateReceiptWithExtractedData,
+            {
+              id: receiptId as Id<"receipts">,
+              fileDisplayName,
+              merchantName,
+              merchantAddress,
+              merchantContact,
+              transactionDate,
+              transactionAmount,
+              receiptSummary,
+              currency,
+              items,
+            },
+          );
 
           // Track event in schematic
           await client.track({
             event: "scan",
             company: {
-              id: user.id,
+              id: userId,
             },
             user: {
-              id: user.id,
+              id: userId,
             },
           });
 

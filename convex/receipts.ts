@@ -199,6 +199,8 @@ export const updateReceiptWithExtractedData = mutation({
       status: "processed", // Mark as processed now that we have extracted data
     });
 
-    return true;
+    return {
+      userId: receipt.userId,
+    };
   },
 });
