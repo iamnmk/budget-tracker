@@ -28,6 +28,7 @@ const agentNetwork = createNetwork({
     return getDefaultRoutingAgent();
   },
 });
+
 export const server = createServer({
   agents: [databaseAgent, receiptScanningAgent],
   networks: [agentNetwork],
