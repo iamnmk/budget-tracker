@@ -18,6 +18,7 @@ export const storeReceipt = mutation({
     fileName: v.string(),
     size: v.number(),
     mimeType: v.string(),
+    accountId: v.optional(v.id("accounts")),
   },
   handler: async (ctx, args) => {
     // Save the receipt to the database
@@ -29,6 +30,7 @@ export const storeReceipt = mutation({
       size: args.size,
       mimeType: args.mimeType,
       status: "pending",
+      accountId: args.accountId,
       // Initialize extracted data fields as null
       merchantName: undefined,
       merchantAddress: undefined,
@@ -180,6 +182,9 @@ export const updateReceiptWithExtractedData = mutation({
       throw new Error("Receipt not found");
     }
 
+    // Parse transaction amount as a number
+    const transactionAmount = parseFloat(args.transactionAmount);
+    
     // Update the receipt with the extracted data
     await ctx.db.patch(args.id, {
       fileDisplayName: args.fileDisplayName,
@@ -193,6 +198,29 @@ export const updateReceiptWithExtractedData = mutation({
       items: args.items,
       status: "processed", // Mark as processed now that we have extracted data
     });
+
+    // If receipt is associated with an account and we have a valid transaction amount,
+    // update the account balance by deducting the transaction amount
+    if (receipt.accountId && !isNaN(transactionAmount)) {
+      console.log(`Deducting ${transactionAmount} from account ${receipt.accountId}`);
+      
+      // Get the account
+      const account = await ctx.db.get(receipt.accountId);
+      if (account) {
+        // Calculate new balance
+        const newBalance = account.balance - transactionAmount;
+        
+        // Update the account
+        await ctx.db.patch(receipt.accountId, {
+          balance: newBalance,
+          updatedAt: Date.now()
+        });
+        
+        console.log(`Updated account ${receipt.accountId} balance to ${newBalance}`);
+      } else {
+        console.log(`Account ${receipt.accountId} not found`);
+      }
+    }
 
     return {
       userId: receipt.userId,

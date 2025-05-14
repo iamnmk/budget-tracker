@@ -20,6 +20,7 @@ export async function uploadPDF(formData: FormData) {
   try {
     // Get the file from the form data
     const file = formData.get("file") as File;
+    const accountId = formData.get("accountId") as string;
 
     if (!file) {
       return { success: false, error: "No file provided" };
@@ -32,6 +33,8 @@ export async function uploadPDF(formData: FormData) {
     ) {
       return { success: false, error: "Only PDF files are allowed" };
     }
+
+    console.log("Processing receipt upload with accountId:", accountId || "none");
 
     // Get upload URL from Convex
     const uploadUrl = await convex.mutation(api.receipts.generateUploadUrl, {});
@@ -62,6 +65,7 @@ export async function uploadPDF(formData: FormData) {
       fileName: file.name,
       size: file.size,
       mimeType: file.type,
+      accountId: accountId || undefined,
     });
 
     // Generate the file URL

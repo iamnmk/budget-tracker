@@ -110,4 +110,27 @@ export const deleteAccount = mutation({
     await ctx.db.delete(args.id);
     return true;
   },
+});
+
+// Function to get a single account by ID
+export const getAccountById = query({
+  args: {
+    id: v.id("accounts"),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Get the account
+    const account = await ctx.db.get(args.id);
+
+    // Verify the account exists and user has access to it
+    if (!account) {
+      return null;
+    }
+
+    if (account.userId !== args.userId) {
+      return null; // Don't throw error, just return null for security
+    }
+
+    return account;
+  },
 }); 

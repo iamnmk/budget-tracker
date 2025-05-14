@@ -15,6 +15,7 @@ export default defineSchema({
     size: v.number(),
     mimeType: v.string(),
     status: v.string(), // 'pending', 'processed', 'error'
+    accountId: v.optional(v.id("accounts")), // Reference to the account this receipt is associated with
 
     // Fields for extracted data
     merchantName: v.optional(v.string()),

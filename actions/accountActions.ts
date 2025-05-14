@@ -140,4 +140,60 @@ export async function deleteAccount(accountId: string) {
       error: error instanceof Error ? error.message : "An unknown error occurred"
     };
   }
+}
+
+/**
+ * Server action to update an account balance after a receipt is processed
+ */
+export async function updateAccountBalance(accountId: string, amount: number) {
+  try {
+    // Ensure the user is authenticated
+    const user = await currentUser();
+    if (!user) {
+      return {
+        success: false,
+        error: "User not authenticated"
+      };
+    }
+
+    console.log(`Updating account ${accountId} balance by deducting ${amount}`);
+
+    // Create a Convex client for this request
+    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    
+    // Get current account to verify ownership and get current balance
+    const account = await convex.query(api.accounts.getAccountById, {
+      id: accountId as Id<"accounts">,
+      userId: user.id
+    });
+
+    if (!account) {
+      return {
+        success: false,
+        error: "Account not found or you don't have access to it"
+      };
+    }
+
+    // Calculate new balance
+    const newBalance = account.balance - amount;
+    
+    // Update the account
+    await convex.mutation(api.accounts.updateAccount, {
+      id: accountId as Id<"accounts">,
+      balance: newBalance
+    });
+
+    console.log(`Account balance updated. New balance: ${newBalance}`);
+
+    return { 
+      success: true,
+      data: { newBalance }
+    };
+  } catch (error) {
+    console.error("Error updating account balance:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "An unknown error occurred"
+    };
+  }
 } 
