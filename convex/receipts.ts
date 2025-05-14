@@ -129,6 +129,7 @@ export const updateReceiptStatus = mutation({
 export const deleteReceipt = mutation({
   args: {
     id: v.id("receipts"),
+    userId: v.string(),
   },
   handler: async (ctx, args) => {
     const receipt = await ctx.db.get(args.id);
@@ -137,13 +138,7 @@ export const deleteReceipt = mutation({
     }
 
     // Verify user has access to this receipt
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    const userId = identity.subject;
-    if (receipt.userId !== userId) {
+    if (receipt.userId !== args.userId) {
       throw new Error("Not authorized to delete this receipt");
     }
 

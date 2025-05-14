@@ -9,9 +9,8 @@ import {
 } from "@dnd-kit/core";
 import { uploadPDF } from "@/actions/uploadPDF";
 import { useUser } from "@clerk/nextjs";
-import { useSchematicEntitlement } from "@schematichq/schematic-react";
 import { Button } from "./ui/button";
-import { CloudUpload, CheckCircle, AlertCircle } from "lucide-react";
+import { CloudUpload, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function PDFDropzone() {
@@ -21,13 +20,6 @@ export default function PDFDropzone() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useUser();
-  const {
-    value: isFeatureEnabled,
-    featureUsageExceeded,
-    featureAllocation,
-  } = useSchematicEntitlement("scan-receipt");
-
-  console.log(isFeatureEnabled);
 
   const handleUpload = useCallback(
     async (files: FileList | File[]) => {
@@ -133,7 +125,7 @@ export default function PDFDropzone() {
   }, []);
 
   const isUserSignedIn = !!user;
-  const canUpload = isUserSignedIn && isFeatureEnabled;
+  const canUpload = isUserSignedIn;
 
   return (
     <DndContext sensors={sensors}>
@@ -174,24 +166,11 @@ export default function PDFDropzone() {
               />
               <Button
                 className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!isFeatureEnabled}
                 onClick={triggerFileInput}
               >
-                {isFeatureEnabled ? "Select files" : "Upgrade to upload"}
+                Select files
               </Button>
             </>
-          )}
-        </div>
-
-        <div className="mt-4">
-          {featureUsageExceeded && (
-            <div className="flex items-center p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
-              <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
-              <span>
-                You have exceeded your limit of {featureAllocation} scans.
-                Please upgrade to continue.
-              </span>
-            </div>
           )}
         </div>
 
