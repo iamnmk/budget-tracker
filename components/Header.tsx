@@ -28,6 +28,10 @@ function Header() {
             <Button variant="outline">My Receipts</Button>
           </Link>
 
+          <Link href="/accounts">
+            <Button variant="outline">Accounts</Button>
+          </Link>
+
           <Link href="/manage-plan">
             <Button>Manage Plan</Button>
           </Link>

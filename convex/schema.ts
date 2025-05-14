@@ -33,4 +33,14 @@ export default defineSchema({
       }),
     ),
   }),
+  
+  accounts: defineTable({
+    userId: v.string(), // Clerk user ID
+    name: v.string(),
+    type: v.string(), // "Checking", "Savings", etc.
+    balance: v.number(),
+    currency: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
 });
